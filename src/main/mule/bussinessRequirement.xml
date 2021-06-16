@@ -7,6 +7,26 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	
+	<sub-flow name="deleteAccountById" doc:id="e9cf4dc7-3a26-4764-851c-d4d1a3bef780" >
+		<logger level="INFO" message="delete:\deleteAccountDetails:finalprojectaccountapi-config" />
+		<db:delete doc:name="Delete" doc:id="8d046e49-c61f-4e47-838b-26c1d6e98c6a" config-ref="Database_Config">
+			<db:sql ><![CDATA[delete from Account where accountId=:accId;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	accId:attributes.queryParams.accountId
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="58af6883-7de2-4ece-9629-1f82005a8493" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"msg": "account Deleted Succesfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7c5bcd3f-846b-4e2e-9732-d19315850352" message="final resposne from DB"/>
+	</sub-flow>
 	<sub-flow name="getAllStudents" doc:id="b77a5770-11b8-4faa-b52b-9905634aeb8d" >
 		<logger level="INFO" doc:name="Logger" doc:id="c732dded-857c-4fc3-856e-5f61f1b61bcc" message="recived the request"/>
 		<db:select doc:name="Select" doc:id="243c6fbe-a28a-4bae-a383-dfe647a6c46b" config-ref="Database_Config">
