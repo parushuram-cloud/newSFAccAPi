@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	<sub-flow name="getAllStudents" doc:id="b77a5770-11b8-4faa-b52b-9905634aeb8d" >
+		<logger level="INFO" doc:name="Logger" doc:id="c732dded-857c-4fc3-856e-5f61f1b61bcc" message="recived the request"/>
+		<db:select doc:name="Select" doc:id="243c6fbe-a28a-4bae-a383-dfe647a6c46b" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from Account]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="9221b5c4-8046-437f-838e-1cb6d4385204" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<flow name="accountInsertFlow" doc:id="5b1e887e-b621-4d5b-a26d-20c8a4725cca" >
+		<logger level="INFO" doc:name="Logger" doc:id="3867bf35-79e6-45ac-913d-cd171ccc5a64" message="recieved the request"/>
+		<db:insert doc:name="Insert" doc:id="db51e4b5-bf6c-41e8-812f-77c1a35fa0de" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into Account(name,gender,phone,email,dateOfBirth)
+values(:name,:gender,:mobileNo,:emailId,:dob):]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	name:payload.name,
+	gender:payload.gender,
+	mobileNo:payload.phone,
+	emailId:payload.email,
+	dob:payload.dateOfBirth
+	
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="057da5dd-ed4d-4c93-851b-1ac5eb496c77" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "account Inserted Successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d88c317c-796f-40e1-ab35-1062c7a5357f" message="final resposne from DB:: #[payload]"/>
+	</flow>
+</mule>
